@@ -21,9 +21,10 @@ const registerUser = async (req, res) => {
     };
 
     const result = await User.insertOne(newUser);
-
     const createdUser = await User.findOne({ _id: result.insertedId });
-
+    const token = jwt.sign({ id: createdUser._id,email: createdUser.email, name: createdUser.name }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
     res.status(201).json(createdUser);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -40,9 +41,13 @@ const loginUser = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ error: "Incorrect Password" });
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
+    const token = jwt.sign(
+      { id: user._id, email: user.email, name: user.name },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1h",
+      }
+    );
     res.status(200).json({ token });
   } catch (error) {
     res.status(400).json({ error: error.message });

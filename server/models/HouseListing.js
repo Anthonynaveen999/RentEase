@@ -8,6 +8,7 @@ const HouseListingSchema = new Schema({
   city: { type: String, required: true },
   country: { type: String, required: true },
   description: { type: String, required: true },
+  imgURL: [{ type: String, required: true}],
   bedroom: { type: Number, required: true },
   bathroom: { type: Number, required: true },
   sqFt: { type: Number, required: true },
