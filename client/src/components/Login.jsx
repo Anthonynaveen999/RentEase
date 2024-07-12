@@ -5,8 +5,9 @@ import { UserContext } from "../context/UserContext";
 import BASE_URL from "../config";
 import axios from "axios";
 import { Button, Checkbox, Label, TextInput } from "flowbite-react";
+import { jwtDecode } from "jwt-decode";
 
-export default function Login(props) {
+export default function Login() {
   const navigate = useNavigate();
   const { setIsLoggedIn } = useContext(AuthContext);
   const { setUserDetails } = useContext(UserContext);
@@ -28,38 +29,35 @@ export default function Login(props) {
 
   async function handleSubmit(e) {
     e.preventDefault();
-
+    console.log(credentials);
     try {
       const response = await axios.post(
-        `${BASE_URL}/user/login`,
-        {
-          email: credentials.email,
-          password: credentials.password,
-        },
-        { withCredentials: true }
+        `${BASE_URL}/user/login`,credentials
       );
-
       if (response.status === 200 ) {
-        setUserDetails(response.data.user.email);
+        const token = response.data.token;
+        const decodedUser = jwtDecode(token);
+        setUserDetails({
+          id: decodedUser.id,
+          name: decodedUser.name,
+          email: decodedUser.email,
+        });
         setIsLoggedIn(true);
+        localStorage.setItem("token", token);
         navigate("/");
       }
     } catch (error) {
-      if (error.response && error.response.status === 401) {
-        props.showAlert("Invalid Credentials", "danger");
-        navigate("/login");
-      } else if (error.response && error.response.status === 400) {
-        props.showAlert("Please fill all the fields", "danger");
-        // console.log(error.response.data);
-        navigate("/login");
-      }
+      console.log(error.response.data);
+      // if (error.response && error.response.status === 401) {
+      //   // props.showAlert("Invalid Credentials", "danger");
+      //   navigate("/login");
+      // } else if (error.response && error.response.status === 404) {
+      //   // props.showAlert("Please fill all the fields", "danger");
+      //   // console.log(error.response.data);
+      //   navigate("/login");
+      // }
     }
   }
-
-//   async function handleGOauthLogin(e) {
-//     e.preventDefault();
-//     window.open(`${BASE_URL}/auth/google`, "_self");
-//   }
 
   return (
     <div className=" flex-grow items-center p-28">
@@ -72,29 +70,29 @@ export default function Login(props) {
         </div>
         <div>
           <Label
-            htmlFor="username"
+            htmlFor="email"
             className="mb-2 block"
-            value="username"
-            name="username"
+            value="email"
+            name="email"
           />
           <TextInput
-            id="username"
+            id="email"
             type="text"
             required
             className="w-full"
-            name="username"
+            name="email"
             onChange={handleChange}
           />
         </div>
         <div>
           <Label
-            htmlFor="password1"
+            htmlFor="password"
             className="mb-2 block"
             value="password"
             name="password"
           />
           <TextInput
-            id="password1"
+            id="password"
             type="password"
             required
             className="w-full"
@@ -106,15 +104,8 @@ export default function Login(props) {
         <Button type="submit" className="mt-4 w-full">
           Submit
         </Button>
-        {/* <Button
-          onClick={handleGOauthLogin}
-          className="mt-2 w-full "
-          type="submit"
-        >
-          Sign In With Google
-        </Button> */}
         <div className="text-center">
-          <Link to="/signup" className="text-slate-500 hover:text-slate-700">
+          <Link to="/register" className="text-slate-500 hover:text-slate-700">
             <span>Don't have an account? Sign Up</span>
           </Link>
         </div>

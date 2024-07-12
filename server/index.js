@@ -13,15 +13,11 @@ const userRoute = require('./routes/user.js');
 mongoose.Promise = Promise;
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true })); 
-
-app.use(
-  cors({
-    origin: "http://localhost:3000",
-    // origin:"http://192.168.163.141:3000", // allow to server to accept request from different origin
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-    credentials: true, // allow session cookie from browser to pass through
-  })
-);
+const corsOptions = {
+  origin: "http://localhost:3000", // Update with your frontend's URL
+  credentials: true,
+};
+app.use(cors(corsOptions));
 
 app.use('/api/user', userRoute)
 app.use('/api/listings', listingRoute)

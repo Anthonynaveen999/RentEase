@@ -25,7 +25,7 @@ const registerUser = async (req, res) => {
     const token = jwt.sign({ id: createdUser._id,email: createdUser.email, name: createdUser.name }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
-    res.status(201).json(createdUser);
+    res.status(200).json({token});
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -33,9 +33,10 @@ const registerUser = async (req, res) => {
 
 const loginUser = async (req, res) => {
   const { email, password } = req.body;
+  console.log(req.body);
 
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: email});
     if (!user) return res.status(404).json({ error: "User not found" });
 
     const isMatch = await bcrypt.compare(password, user.password);

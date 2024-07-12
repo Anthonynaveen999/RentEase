@@ -24,11 +24,20 @@
 // export default Header;
 
 
-
-import { Avatar, Dropdown, Navbar } from "flowbite-react";
+import React,{ useContext } from "react";
+import { Avatar, Button, Dropdown, Navbar } from "flowbite-react";
 import HouseIcon from "@mui/icons-material/House";
-
+import { AuthContext } from "../context/AuthContext";
+import { UserContext } from "../context/UserContext";
 export default function Header() {
+  const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
+  const { userDetails, setUserDetails } = useContext(UserContext);
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setUserDetails({});
+    localStorage.removeItem("token");
+  };
+
   return (
     <Navbar fluid className="bg-black text-white">
       <Navbar.Brand href="https://flowbite-react.com">
@@ -43,29 +52,33 @@ export default function Header() {
         </span>
       </Navbar.Brand>
       <div className="flex md:order-2">
-        <Dropdown
-          arrowIcon={false}
-          inline
-          label={
-            <Avatar
-              alt="User settings"
-              img="https://flowbite.com/docs/images/people/profile-picture-5.jpg"
-              rounded
-            />
-          }
-        >
-          <Dropdown.Header>
-            <span className="block text-sm">Bonnie Green</span>
-            <span className="block truncate text-sm font-medium">
-              name@flowbite.com
-            </span>
-          </Dropdown.Header>
-          <Dropdown.Item>Profile</Dropdown.Item>
-          <Dropdown.Divider />
-          <Dropdown.Item>Logout</Dropdown.Item>
-        </Dropdown>
-        <Navbar.Toggle />
+        {isLoggedIn === true ? (
+          <>
+            <Dropdown
+              arrowIcon={false}
+              inline
+              label={
+                <Avatar
+                  alt="User Profile"
+                  rounded
+                  className="hover:shadow-lg shadow-blue-50"
+                >
+                  {/* {username ? username.charAt(0).toUpperCase() : "P"} */}
+                </Avatar>
+              }
+            >
+              <Dropdown.Item href="/profile">Profile</Dropdown.Item>
+              <Dropdown.Item href="/settings">Settings</Dropdown.Item>
+              <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
+            </Dropdown>
+          </>
+        ) : (
+          <Button href="/login" className="mr-3">
+            Login
+          </Button>
+        )}
       </div>
+      <Navbar.Toggle />
       <Navbar.Collapse className="text-white text-xl">
         <Navbar.Link href="/" active className="text-white text-lg">
           Home
