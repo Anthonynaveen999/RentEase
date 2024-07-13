@@ -17,7 +17,6 @@ const createHouseListing = async (req, res) => {
     securityDeposit,
     availableFor,
   } = req.body;
-  console.log(req.body);
   try {
     const newHouseListing = {
     //   owner: new ObjectId(owner),

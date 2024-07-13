@@ -49,6 +49,21 @@ export default function AddProperty({ open, setOpen }) {
   };
 
   const handleReset = () => {
+    setHouseDetails({
+        owner: ownerName,
+        rent: 0,
+        address: "",
+        city: "",
+        country: "",
+        description: "",
+        imgURL: [],
+        bedroom: 0,
+        bathroom: 0,
+        sqFt: 0,
+        contact: "",
+        securityDeposit: 0,
+        availableFor: "",
+        });
     setActiveStep(0);
   };
 
@@ -57,15 +72,6 @@ export default function AddProperty({ open, setOpen }) {
     setHouseDetails((prevDetails) => ({
       ...prevDetails,
       [name]: value,
-    }));
-  };
-
-  const handleFileChange = (event) => {
-    setHouseDetails((prevDetails) => ({
-      ...prevDetails,
-      imgURL: Array.from(event.target.files).map((file) =>
-        URL.createObjectURL(file)
-      ),
     }));
   };
 
@@ -87,7 +93,7 @@ export default function AddProperty({ open, setOpen }) {
       case 0:
         return <AddLocation houseDetails={houseDetails} handleInputChange={handleInputChange} />;
       case 1:
-        return <AddImage houseDetails={houseDetails} handleFileChange={handleFileChange} />;
+        return <AddImage houseDetails={houseDetails} setHouseDetails={setHouseDetails} />;
       case 2:
         return <BasicDetails houseDetails={houseDetails} handleInputChange={handleInputChange} />;
       case 3:
@@ -104,7 +110,7 @@ export default function AddProperty({ open, setOpen }) {
       aria-labelledby="modal-modal-title"
       aria-describedby="modal-modal-description"
     >
-      <Container className="bg-white p-5 mt-10 h-4/5" maxWidth="md">
+      <Container className="bg-white p-5 mt-10 h-4/5 overflow-scroll" maxWidth="md">
         <Box sx={{ width: "100%", padding: 5, textAlign: "center" }}>
           <Stepper activeStep={activeStep} sx={{ height: "1/2" }}>
             {steps.map((step, index) => (

@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }) => {
         if (expTime < currentTime) {
           setIsLoggedIn(false);
           localStorage.removeItem("token");
-          localStorage.removeItem("isLoggedIn");
+          logout();
         }
       } catch (error) {
         console.error("Invalid token:", error);
@@ -33,10 +33,9 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem("isLoggedIn");
       }
     } 
-    // else {
-    //   setIsLoggedIn(false);
-    //   localStorage.removeItem("token");
-    // }
+    else {
+      logout();
+    }
   }, []);
 
   const login = () => setIsLoggedIn(true);
