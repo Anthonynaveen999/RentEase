@@ -9,7 +9,7 @@ import { jwtDecode } from "jwt-decode";
 
 export default function Login() {
   const navigate = useNavigate();
-  const { setIsLoggedIn } = useContext(AuthContext);
+  const { setIsLoggedIn, login } = useContext(AuthContext);
   const { setUserDetails } = useContext(UserContext);
 
   const [credentials, setCredentials] = useState({
@@ -42,8 +42,9 @@ export default function Login() {
           name: decodedUser.name,
           email: decodedUser.email,
         });
-        setIsLoggedIn(true);
-        localStorage.setItem("token", token);
+        // setIsLoggedIn(true);
+        login();
+        localStorage.setItem("token", JSON.stringify(token));
         navigate("/");
       }
     } catch (error) {

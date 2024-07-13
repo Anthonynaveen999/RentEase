@@ -7,12 +7,14 @@ import Login from './components/Login';
 import Register from './components/Register';
 import { AuthProvider } from './context/AuthContext.js';
 import { UserProvider } from './context/UserContext.js';
+import { MantineProvider } from '@mantine/core';
 
 function App() {
   return (
-    <Router>
-      <AuthProvider>
-        <UserProvider>
+    <MantineProvider withGlobalStyles withNormalizeCSS>
+      <Router>
+        <AuthProvider>
+          <UserProvider>
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
@@ -21,9 +23,10 @@ function App() {
                 <Route path="/listings" element={<Listings />} />
               </Route>
             </Routes>
-        </UserProvider>
-      </AuthProvider>
-    </Router>
+          </UserProvider>
+        </AuthProvider>
+      </Router>
+    </MantineProvider>
   );
 }
 

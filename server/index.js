@@ -20,7 +20,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 app.use('/api/user', userRoute)
-app.use('/api/listings', listingRoute)
+app.use('/api/houselistings', listingRoute)
 
 app.get('/', async (req, res) => {
     res.send('Hello, world!');

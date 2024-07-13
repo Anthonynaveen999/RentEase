@@ -1,42 +1,30 @@
-// import React from 'react';
-// import { Link,NavLink } from 'react-router-dom';
-
-// const Header = () => {
-//     return (
-//       <header className="flex w-full justify-between bg-black text-white p-3">
-//         <Link to="/" className="brand text-2xl">
-//           RentEase
-//         </Link>
-//         <NavLink to="/">Home</NavLink>
-//         <NavLink to="/listings">Properties</NavLink>
-//         <div className="avatar-dropdown">
-//           <img src="avatar.jpg" alt="User Avatar" />
-//           <div className="dropdown-content">
-//             <a href="/profile">Profile</a>
-//             <a href="/settings">Settings</a>
-//             <a href="/logout">Logout</a>
-//           </div>
-//         </div>
-//       </header>
-//     );
-// };
-
-// export default Header;
-
-
-import React,{ useContext } from "react";
+import React,{ useContext, useState } from "react";
 import { Avatar, Button, Dropdown, Navbar } from "flowbite-react";
 import HouseIcon from "@mui/icons-material/House";
 import { AuthContext } from "../context/AuthContext";
 import { UserContext } from "../context/UserContext";
+import AddProperty from "./AddProperty";
+
 export default function Header() {
-  const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
+  const { isLoggedIn, setIsLoggedIn, logout } = useContext(AuthContext);
   const { userDetails, setUserDetails } = useContext(UserContext);
+  const [ modalOpen, setModalOpen ] = useState(false);
+
   const handleLogout = () => {
     setIsLoggedIn(false);
-    setUserDetails({});
+    // setUserDetails({});
+    logout();
     localStorage.removeItem("token");
   };
+
+  const handleAddProperty = () => {
+    if (isLoggedIn === true) {
+      setModalOpen(true);
+    } 
+    // else {
+    //   alert("Please login to add a property");
+    // }
+  }
 
   return (
     <Navbar fluid className="bg-black text-white">
@@ -86,6 +74,11 @@ export default function Header() {
         <Navbar.Link href="/listings" className="text-lg">
           Properties
         </Navbar.Link>
+        {/* <Navbar.Link onClick={handleAddProperty} className="text-lg">
+          Add Property
+        </Navbar.Link> */}
+        <div onClick={handleAddProperty} className="text-lg hover:cursor-pointer">Add Property</div>
+        <AddProperty open={modalOpen} setOpen={setModalOpen} />
         {/* <Navbar.Link href="#">Services</Navbar.Link>
         <Navbar.Link href="#">Pricing</Navbar.Link>
         <Navbar.Link href="#">Contact</Navbar.Link> */}
