@@ -4,10 +4,10 @@ import { AuthContext } from "../context/AuthContext";
 import { UserContext } from "../context/UserContext";
 import BASE_URL from "../config";
 import axios from "axios";
-import { Button, Checkbox, Label, TextInput } from "flowbite-react";
+import { Alert, Button, Checkbox, Label, TextInput } from "flowbite-react";
 import { jwtDecode } from "jwt-decode";
 
-export default function Login() {
+export default function Login({ props }) {
   const navigate = useNavigate();
   const { setIsLoggedIn, login } = useContext(AuthContext);
   const { setUserDetails } = useContext(UserContext);
@@ -29,7 +29,6 @@ export default function Login() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    console.log(credentials);
     try {
       const response = await axios.post(
         `${BASE_URL}/user/login`,credentials
@@ -48,15 +47,16 @@ export default function Login() {
         navigate("/");
       }
     } catch (error) {
-      console.log(error.response.data);
-      // if (error.response && error.response.status === 401) {
-      //   // props.showAlert("Invalid Credentials", "danger");
-      //   navigate("/login");
-      // } else if (error.response && error.response.status === 404) {
-      //   // props.showAlert("Please fill all the fields", "danger");
-      //   // console.log(error.response.data);
-      //   navigate("/login");
-      // }
+        if (error.response.status === 401 || error.response.status === 402) {
+          // props.showAlert("Invalid Credentials", "danger");
+          alert("Invalid Credentials");
+          navigate("/login");
+        } else if (error.response && error.response.status === 404) {
+            props.showAlert("Please fill all the fields", "danger");
+          // console.log(error.response.data);
+          navigate("/login");
+        }
+
     }
   }
 
@@ -102,7 +102,7 @@ export default function Login() {
           />
         </div>
 
-        <Button type="submit" className="mt-4 w-full">
+        <Button type="submit" className="mt-4 w-full" style={{backgroundColor: '#ca3521'}}>
           Submit
         </Button>
         <div className="text-center">

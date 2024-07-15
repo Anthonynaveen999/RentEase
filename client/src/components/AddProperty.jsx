@@ -21,36 +21,39 @@ const steps = [
   { label: "Additional Details", description: "Extra info" },
 ];
 
-export default function AddProperty({ open, setOpen }) {
-    const ownerName = JSON.parse(localStorage.getItem("name"));
+export default function AddProperty({ open, setOpen, property }) {
+    const ownerId = JSON.parse(localStorage.getItem("id"));
     const [houseDetails, setHouseDetails] = useState({
-    owner: ownerName, // Assuming you will set this value separately
-    rent: 0,
-    address: "",
-    city: "",
-    country: "",
-    description: "",
-    imgURL: [],
-    bedroom: 0,
-    bathroom: 0,
-    sqFt: 0,
-    contact: "",
-    securityDeposit: 0,
-    availableFor: "",
+    owner: ownerId, // Assuming you will set this value separately
+    rent: property?.rent || 0,
+    address: property?.address || "",
+    city: property?.city || "",
+    country: property?.country || "",
+    description: property?.description || "",
+    imgURL: property?.imgURL || [],
+    bedroom: property?.bedroom || 0,
+    bathroom: property?.bathroom || 0,
+    sqFt: property?.sqFt || 0,
+    contact: property?.contact || "",
+    securityDeposit: property?.securityDeposit || 0,
+    availableFor: property?.availableFor || "",
   });
+  console.log(houseDetails);
   const [activeStep, setActiveStep] = React.useState(0);
 
-  const handleNext = () => {
+  const handleNext = (event) => {
+    event.stopPropagation();
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
 
-  const handleBack = () => {
+  const handleBack = (event) => {
+    event.stopPropagation();
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
   const handleReset = () => {
     setHouseDetails({
-        owner: ownerName,
+        owner: ownerId,
         rent: 0,
         address: "",
         city: "",
@@ -75,11 +78,18 @@ export default function AddProperty({ open, setOpen }) {
     }));
   };
 
+  const handleModalClose = (event) => {
+    event.stopPropagation();
+    setOpen(false);
+  };
+
   const handleSubmit = async () => {
     try {
         console.log(houseDetails);
-      const response = await axios.post(`${BASE_URL}/houselistings`, houseDetails);
-      console.log("House listing created:", response.data);
+        {
+          const response = property ? await axios.put(`${BASE_URL}/houselistings/${property._id}`, houseDetails) : await axios.post(`${BASE_URL}/houselistings`, houseDetails);
+        }
+      // console.log("House listing created:", response.data);
       // Reset the form after successful submission
       handleReset();
       setOpen(false);
@@ -106,11 +116,15 @@ export default function AddProperty({ open, setOpen }) {
   return (
     <Modal
       open={open}
-      onClose={() => setOpen(false)}
+      onClose={handleModalClose}
       aria-labelledby="modal-modal-title"
       aria-describedby="modal-modal-description"
     >
-      <Container className="bg-white p-5 mt-10 h-4/5 overflow-scroll" maxWidth="md">
+      <Container
+        className="bg-white p-5 mt-10 h-4/5 overflow-scroll"
+        maxWidth="md"
+        onClick={(e) => e.stopPropagation()}
+      >
         <Box sx={{ width: "100%", padding: 5, textAlign: "center" }}>
           <Stepper activeStep={activeStep} sx={{ height: "1/2" }}>
             {steps.map((step, index) => (
