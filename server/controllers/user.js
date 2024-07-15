@@ -2,6 +2,7 @@ const { ObjectId } = require("mongodb");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../db.js").collection("User");
+const houseListing = require("../db.js").collection("HouseListing");
 
 const registerUser = async (req, res) => {
   const { name, email, password } = req.body;
@@ -33,14 +34,13 @@ const registerUser = async (req, res) => {
 
 const loginUser = async (req, res) => {
   const { email, password } = req.body;
-  console.log(req.body);
 
   try {
     const user = await User.findOne({ email: email});
-    if (!user) return res.status(404).json({ error: "User not found" });
+    if (!user) return res.status(401).json({ error: "User not found" });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ error: "Incorrect Password" });
+    if (!isMatch) return res.status(402).json({ error: "Incorrect Password" });
 
     const token = jwt.sign(
       { id: user._id, email: user.email, name: user.name },
@@ -55,8 +55,20 @@ const loginUser = async (req, res) => {
   }
 };
 
+const getUser = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const user = await User.findOne({ _id: new ObjectId(id) });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+}
+
 const addFavorite = async (req, res) => {
-  const { userId, houseId } = req.params;
+  const { userId, houseId } = req.body;
 
   try {
     const user = await User.findOne({ _id: new ObjectId(userId) });
@@ -64,7 +76,7 @@ const addFavorite = async (req, res) => {
 
     if (!user.favHouseIds.includes(houseId)) {
       user.favHouseIds.push(houseId);
-      await usersCollection.updateOne(
+      await User.updateOne(
         { _id: new ObjectId(userId) },
         { $set: { favHouseIds: user.favHouseIds } }
       );
@@ -76,16 +88,36 @@ const addFavorite = async (req, res) => {
 };
 
 const getFavorites = async (req, res) => {
-  const { userId } = req.params;
+  const { userId } = req.body;
+  try {
+    const user = await User.findOne({ _id: new ObjectId(userId) });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const favoriteHouses = await houseListing
+      .find({ _id: { $in: user.favHouseIds.map((id) => new ObjectId(id)) } })
+      .toArray();
+    res.status(200).json(favoriteHouses);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+const removeFavorite = async (req, res) => {
+  const { userId, houseId } = req.body;
 
   try {
     const user = await User.findOne({ _id: new ObjectId(userId) });
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    const favoriteHouses = await houseListingsCollection
-      .find({ _id: { $in: user.favHouseIds.map((id) => new ObjectId(id)) } })
-      .toArray();
-    res.status(200).json(favoriteHouses);
+    const index = user.favHouseIds.indexOf(houseId);
+    if (index > -1) {
+      user.favHouseIds.splice(index, 1);
+      await User.updateOne(
+        { _id: new ObjectId(userId) },
+        { $set: { favHouseIds: user.favHouseIds } }
+      );
+    }
+    res.status(200).json(user);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -96,4 +128,6 @@ module.exports = {
   loginUser,
   addFavorite,
   getFavorites,
+  removeFavorite,
+  getUser,
 };

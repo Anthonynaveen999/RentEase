@@ -100,7 +100,7 @@ export default function Register() {
             onChange={handleChange}
           />
         </div>
-        <Button type="submit" className="mt-4 w-full">
+        <Button type="submit" className="mt-4 w-full" style={{backgroundColor: '#ca3521'}}>
           Submit
         </Button>
         <div className="text-center">

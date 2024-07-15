@@ -4,12 +4,16 @@ const {
   loginUser,
   addFavorite,
   getFavorites,
+  removeFavorite,
+  getUser,
 } = require("../controllers/user.js");
 const router = express.Router();
 
 router.post("/register", registerUser);
 router.post("/login", loginUser);
-router.post("/:userId/favorites/:houseId", addFavorite);
-router.get("/:userId/favorites", getFavorites);
+router.get("/:id",getUser);
+router.post("/addFavorite", addFavorite);
+router.post("/favorites", getFavorites);
+router.post("/removeFavorite", removeFavorite);
 
 module.exports = router;

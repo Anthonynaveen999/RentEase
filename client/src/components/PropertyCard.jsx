@@ -1,23 +1,89 @@
-import React from "react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardMedia, Typography, Box, IconButton } from "@mui/material";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import { useState } from "react";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import axios from "axios";
+import BASE_URL from "../config";
+import { useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
+import AddProperty from "./AddProperty";
 
 const PropertyCard = ({ property }) => {
-    console.log(property);
-  const [isFavorite, setIsFavorite] = useState(false);
-
-  const toggleFavorite = () => {
+  const { isLoggedIn } = useContext(AuthContext);
+  const [isFavorite, setIsFavorite] = useState(property.isFavorite);
+  const [modalOpen, setModalOpen] = useState(false);
+  const userId = JSON.parse(localStorage.getItem('id'));
+  const Navigate = useNavigate();
+  const toggleFavorite = async (e) => {
+    e.stopPropagation();
     setIsFavorite(!isFavorite);
+    try {
+      if (!isFavorite) {
+        await axios.post(`${BASE_URL}/user/addFavorite`, { userId, houseId: property._id });
+      } else {
+        await axios.post(`${BASE_URL}/user/removeFavorite`, { userId, houseId: property._id });
+      }
+    } catch (error) {
+      console.error('Error updating favorite:', error);
+    }
+  };
+
+  const handleCardClick = () => {
+    Navigate(`/property/${property._id}`);
+  };
+
+  const handleEdit = (event) => {
+    event.stopPropagation();
+    if (isLoggedIn === true) {
+      setModalOpen(true);
+    } else {
+      alert("Please login to add a property");
+    }
+  };
+
+  const handleDelete = async (event) => {
+    event.stopPropagation();
+    try {
+      await axios.delete(`${BASE_URL}/houselistings/${property._id}`);
+      // Refresh property list after deletion
+    } catch (error) {
+      console.error("Error deleting property:", error);
+    }
   };
 
   return (
-    <Card sx={{ display: "flex", marginBottom: 2 }}>
+    <Card
+      elevation={4}
+      sx={{ display: "flex-col", position: "relative", marginBottom: 2 }}
+      onClick={handleCardClick}
+    >
+      <AddProperty open={modalOpen} setOpen={setModalOpen} property={property}/>
+      <Box sx={{ position: "absolute", display: 'flex', flexDirection: 'column' , right: "0", pl: 1, pb: 1 }}>
+        <IconButton onClick={toggleFavorite}>
+          {isFavorite ? (
+            <FavoriteIcon htmlColor="red" />
+          ) : (
+            <FavoriteBorderIcon htmlColor="white" />
+          )}
+        </IconButton>
+        {property?.owner === userId && (
+          <>
+            <IconButton onClick={handleEdit}>
+              <EditIcon htmlColor="white" />
+            </IconButton>
+            <IconButton onClick={handleDelete}>
+              <DeleteIcon htmlColor="white" />
+            </IconButton>
+          </>
+        )}
+      </Box>
       {property?.imgURL?.length >= 1 && (
         <CardMedia
           component="img"
-          sx={{ width: 160 }}
+          sx={{ width: "100%", height: 200, objectFit: "cover" }}
           image={property?.imgURL[0]}
           alt="Property image"
         />
@@ -40,7 +106,7 @@ const PropertyCard = ({ property }) => {
             color="text.secondary"
             component="div"
           >
-            Boys, Girls, Family
+            {property.availableFor}
           </Typography>
           <Box
             sx={{
@@ -50,22 +116,26 @@ const PropertyCard = ({ property }) => {
               mt: 1,
             }}
           >
-            <Typography variant="subtitle1" component="div">
-              ₹ {property.rent} Rent/month
-            </Typography>
-            <Typography variant="subtitle1" component="div">
-              ₹ {property.securityDeposit} Security Deposit
-            </Typography>
-            <Typography variant="subtitle1" component="div">
-              {property.sqFt} sq.ft Area
-            </Typography>
+            <div className="flex-col justify-center items-center">
+              <Typography variant="h6" component="div">
+                ₹ {property.rent}
+              </Typography>
+              <span style={{ fontSize: "0.9rem" }}> per month</span>
+            </div>
+            <div className="flex-col justify-center items-center">
+              <Typography variant="h6" component="div">
+                ₹ {property.securityDeposit}
+              </Typography>
+              <span style={{ fontSize: "0.9rem" }}> Security Deposit</span>
+            </div>
+            <div className="flex-col justify-center items-center">
+              <Typography variant="h6" component="div">
+                {property.sqFt}
+              </Typography>
+              <span style={{ fontSize: "0.9rem" }}> Sq. Ft.</span>
+            </div>
           </Box>
         </CardContent>
-        <Box sx={{ display: "flex", alignItems: "center", pl: 1, pb: 1 }}>
-          <IconButton onClick={toggleFavorite}>
-            {isFavorite ? <FavoriteIcon /> : <FavoriteBorderIcon />}
-          </IconButton>
-        </Box>
       </Box>
     </Card>
   );
